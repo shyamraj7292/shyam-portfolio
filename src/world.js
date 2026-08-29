@@ -378,6 +378,60 @@ function renderZone(id) {
 document.getElementById('ghlink').href = profile.github;
 const spd = document.getElementById('spd');
 
+/* ---------- engine audio (procedural — no audio files) ---------- */
+const audio = { ctx: null, ready: false, master: null, filter: null, engineGain: null, oscs: [] };
+let soundOn = true;
+try { if (localStorage.getItem('world-sound') === '0') soundOn = false; } catch (e) {}
+
+function initAudio() {
+  if (audio.ctx) return;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return;
+  const ctx = new Ctx();
+  const master = ctx.createGain(); master.gain.value = soundOn ? 0.9 : 0.0; master.connect(ctx.destination);
+  const filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 500; filter.Q.value = 7;
+  const engineGain = ctx.createGain(); engineGain.gain.value = 0.0;
+  filter.connect(engineGain); engineGain.connect(master);
+  const mk = (type, mult, gain) => {
+    const o = ctx.createOscillator(); o.type = type; o.frequency.value = 46 * mult;
+    const g = ctx.createGain(); g.gain.value = gain;
+    o.connect(g); g.connect(filter); o.start();
+    return { o, mult };
+  };
+  audio.oscs = [mk('sawtooth', 1, 0.6), mk('sawtooth', 1.5, 0.22), mk('square', 0.5, 0.5)];
+  Object.assign(audio, { ctx, master, filter, engineGain, ready: true });
+}
+function armAudio() {
+  if (!audio.ctx) initAudio();
+  if (audio.ctx && audio.ctx.state === 'suspended') audio.ctx.resume();
+}
+['keydown', 'pointerdown', 'touchstart'].forEach((ev) => addEventListener(ev, armAudio));
+
+function updateAudio() {
+  if (!audio.ready) return;
+  const now = audio.ctx.currentTime;
+  const s = Math.min(Math.abs(state.speed) / MAX, 1);        // 0..1
+  const rev = keys.up ? 1 : (keys.down ? 0.6 : 0);
+  const base = 46 + s * 118 + rev * 14;                      // idle → redline
+  for (const { o, mult } of audio.oscs) o.frequency.setTargetAtTime(base * mult, now, 0.05);
+  audio.filter.frequency.setTargetAtTime(360 + s * 1500, now, 0.05);
+  const target = 0.035 + s * 0.11 + rev * 0.025;            // louder with speed/throttle
+  audio.engineGain.gain.setTargetAtTime(target, now, 0.08);
+}
+function setSound(on) {
+  soundOn = on;
+  try { localStorage.setItem('world-sound', on ? '1' : '0'); } catch (e) {}
+  const btn = document.getElementById('sound');
+  if (btn) btn.textContent = on ? '🔊' : '🔇';
+  if (audio.ready) audio.master.gain.setTargetAtTime(on ? 0.9 : 0.0, audio.ctx.currentTime, 0.05);
+  if (on) armAudio();
+}
+{
+  const btn = document.getElementById('sound');
+  btn.textContent = soundOn ? '🔊' : '🔇';
+  btn.addEventListener('click', () => setSound(!soundOn));
+}
+
 /* ---------- input ---------- */
 const map = {
   ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down',
@@ -419,6 +473,7 @@ function animate() {
 
   updateCar(dt);
   updateCamera();
+  updateAudio();
 
   // animate zone gems + rings; detect proximity
   const { zone, dist } = nearestZone();
@@ -448,7 +503,7 @@ function animate() {
 }
 animate();
 
-if (import.meta.env && import.meta.env.DEV) window.__test = { openPanel, zones, state };
+if (import.meta.env && import.meta.env.DEV) window.__test = { openPanel, zones, state, audio, updateAudio, keys };
 
 /* ---------- hide loader ---------- */
 addEventListener('load', () => setTimeout(hideLoader, 350));

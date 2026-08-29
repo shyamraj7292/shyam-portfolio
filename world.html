@@ -45,10 +45,10 @@
     #titlecard .keys b{color:var(--green)}
 
     #links{top:18px;right:18px;display:flex;gap:8px;pointer-events:auto}
-    #links a{pointer-events:auto;font-size:12px;text-decoration:none;color:var(--bright);
+    #links a,#links .linkbtn{pointer-events:auto;font-size:12px;text-decoration:none;color:var(--bright);
       background:var(--panel);border:1px solid var(--edge);border-radius:9px;padding:7px 11px;
-      backdrop-filter:blur(6px);transition:.15s}
-    #links a:hover{color:var(--ink);background:var(--green);border-color:var(--green)}
+      backdrop-filter:blur(6px);transition:.15s;font-family:inherit;cursor:pointer;line-height:1}
+    #links a:hover,#links .linkbtn:hover{color:var(--ink);background:var(--green);border-color:var(--green)}
 
     #speedo{bottom:16px;left:18px;font-size:12px;color:var(--dim);
       background:var(--panel);border:1px solid var(--edge);border-radius:9px;padding:6px 10px;
@@ -127,6 +127,7 @@
   </div>
 
   <div id="links" class="hud">
+    <button id="sound" class="linkbtn" aria-label="Toggle engine sound" title="Toggle engine sound">🔊</button>
     <a href="./terminal.html">▮ terminal</a>
     <a id="ghlink" href="#" target="_blank" rel="noopener">GitHub ↗</a>
   </div>
