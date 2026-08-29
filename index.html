@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shyamraj H — Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" />
+  <style>
+    :root{
+      --bg:#06120e; --bg2:#08180f; --green:#34ff8f; --bright:#c6ffdd;
+      --dim:#7fb49a; --edge:rgba(52,255,143,.28); --link:#5fe0ff; --ink:#04120c;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{min-height:100%}
+    body{
+      background:
+        radial-gradient(120% 90% at 50% -10%, #0e2a1c 0%, transparent 60%),
+        repeating-linear-gradient(0deg, rgba(52,255,143,.035) 0 1px, transparent 1px 42px),
+        repeating-linear-gradient(90deg, rgba(52,255,143,.035) 0 1px, transparent 1px 42px),
+        var(--bg);
+      color:var(--bright);
+      font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      min-height:100vh;padding:40px 20px;gap:8px;text-align:center;
+    }
+    .eyebrow{font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--green);
+      display:flex;align-items:center;gap:12px}
+    .eyebrow::before,.eyebrow::after{content:"";width:26px;height:1px;background:var(--edge)}
+    h1{font-family:"Baloo 2",sans-serif;font-weight:700;color:var(--bright);
+      font-size:clamp(34px,8vw,66px);line-height:1;letter-spacing:.01em;margin:14px 0 6px;
+      text-shadow:0 0 30px rgba(52,255,143,.25)}
+    h1 .g{color:var(--green)}
+    .tag{color:var(--dim);font-size:clamp(13px,2.4vw,16px);max-width:52ch}
+
+    .cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:34px 0 26px;
+      width:min(760px,100%)}
+    @media(max-width:620px){.cards{grid-template-columns:1fr}}
+    .card{position:relative;display:flex;flex-direction:column;text-decoration:none;
+      background:linear-gradient(180deg, rgba(10,26,18,.9), rgba(6,18,12,.9));
+      border:1px solid var(--edge);border-radius:18px;padding:20px;overflow:hidden;
+      color:var(--bright);transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+    .card:hover{transform:translateY(-5px);border-color:var(--green);
+      box-shadow:0 20px 50px -24px rgba(52,255,143,.5)}
+    .card .preview{height:132px;border-radius:12px;overflow:hidden;position:relative;
+      border:1px solid rgba(52,255,143,.16);margin-bottom:16px}
+    .card h2{font-family:"Baloo 2",sans-serif;font-size:22px;color:var(--green);
+      display:flex;align-items:center;gap:8px}
+    .card p{color:var(--dim);font-size:13px;margin-top:4px;line-height:1.5}
+    .card .go{margin-top:14px;font-size:13px;color:var(--bright);font-weight:700;
+      display:inline-flex;align-items:center;gap:6px}
+    .card .go .arr{transition:transform .2s}
+    .card:hover .go .arr{transform:translateX(4px)}
+
+    /* 3D preview */
+    .pv3d{background:linear-gradient(180deg,#bfe3ff,#e9f5ff 55%,#7ddcae 55%)}
+    .pv3d .island{position:absolute;left:50%;bottom:-30px;transform:translateX(-50%);
+      width:200px;height:90px;background:#4bbf73;border-radius:50%}
+    .pv3d .sun{position:absolute;top:12px;right:16px;width:34px;height:34px;border-radius:50%;
+      background:radial-gradient(circle,#fff3c4,#ffd25e);box-shadow:0 0 24px #ffd25e}
+    .pv3d .tree{position:absolute;bottom:34px;width:0;height:0;
+      border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:22px solid #2f9e57}
+    .pv3d .t1{left:58px}.pv3d .t2{right:54px;transform:scale(.8)}
+    .pv3d .car{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);width:52px;height:20px}
+    .pv3d .car .b{position:absolute;inset:4px 0 4px;background:#17181d;border-radius:6px}
+    .pv3d .car .s{position:absolute;left:50%;top:7px;transform:translateX(-50%);width:6px;height:12px;background:#34ff8f;border-radius:2px;box-shadow:0 0 8px #34ff8f}
+    .pv3d .car .w{position:absolute;bottom:0;width:10px;height:10px;border-radius:50%;background:#20342b}
+    .pv3d .car .w.l{left:5px}.pv3d .car .w.r{right:5px}
+
+    /* terminal preview */
+    .pvterm{background:#05080a;font-family:"JetBrains Mono",monospace;padding:12px 14px;text-align:left}
+    .pvterm .dots{display:flex;gap:5px;margin-bottom:8px}
+    .pvterm .dots i{width:8px;height:8px;border-radius:50%;display:block}
+    .pvterm .dots .r{background:#ff5f56}.pvterm .dots .y{background:#ffbd2e}.pvterm .dots .g{background:#27c93f}
+    .pvterm code{display:block;font-size:11px;line-height:1.6;color:#34ff8f;white-space:nowrap}
+    .pvterm code .p{color:#c6ffdd}
+    .pvterm .cur{display:inline-block;width:6px;height:11px;background:#34ff8f;vertical-align:-1px;animation:blink 1.1s steps(1) infinite}
+    @keyframes blink{50%{opacity:0}}
+
+    .foot{display:flex;flex-wrap:wrap;gap:8px 10px;justify-content:center;margin-top:6px}
+    .foot a{font-size:12.5px;text-decoration:none;color:var(--bright);
+      border:1px solid var(--edge);border-radius:9px;padding:8px 13px;transition:.15s}
+    .foot a:hover{color:var(--ink);background:var(--green);border-color:var(--green)}
+    .meta{color:var(--dim);font-size:11px;margin-top:16px;letter-spacing:.03em}
+    @media (prefers-reduced-motion:reduce){.cur{animation:none}}
+  </style>
+</head>
+<body>
+  <div class="eyebrow">Portfolio</div>
+  <h1><span class="g">Shyamraj</span> H</h1>
+  <p class="tag" id="tag">I build secure software &amp; offensive-security tooling.</p>
+
+  <div class="cards">
+    <a class="card" href="./world.html">
+      <div class="preview pv3d">
+        <div class="sun"></div>
+        <div class="tree t1"></div><div class="tree t2"></div>
+        <div class="island"></div>
+        <div class="car"><div class="b"></div><div class="s"></div><i class="w l"></i><i class="w r"></i></div>
+      </div>
+      <h2>🏝️ 3D World</h2>
+      <p>Drive a car around an interactive island and roll up to my projects, experience &amp; more.</p>
+      <span class="go">Enter the world <span class="arr">→</span></span>
+    </a>
+
+    <a class="card" href="./terminal.html">
+      <div class="preview pvterm">
+        <div class="dots"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <code><span class="p">visitor@shyamraj:~$</span> whoami</code>
+        <code>shyamraj — SDE &amp; security</code>
+        <code><span class="p">visitor@shyamraj:~$</span> projects</code>
+        <code><span class="p">visitor@shyamraj:~$</span> <span class="cur"></span></code>
+      </div>
+      <h2>▮ Terminal</h2>
+      <p>Prefer a keyboard? Explore everything through an interactive command line.</p>
+      <span class="go">Open the terminal <span class="arr">→</span></span>
+    </a>
+  </div>
+
+  <nav class="foot">
+    <a id="gh" href="#" target="_blank" rel="noopener">GitHub</a>
+    <a id="li" href="#" target="_blank" rel="noopener">LinkedIn</a>
+    <a id="em" href="#">Email</a>
+    <a href="./resume.pdf" target="_blank" rel="noopener">Résumé</a>
+  </nav>
+  <div class="meta" id="meta">B.Tech CSE (Cybersecurity) · Coimbatore, India</div>
+
+  <script type="module">
+    import { profile } from './src/data.js';
+    document.getElementById('tag').textContent = profile.tagline;
+    document.getElementById('gh').href = profile.github;
+    document.getElementById('li').href = profile.linkedin;
+    document.getElementById('em').href = 'mailto:' + profile.email;
+    document.getElementById('meta').textContent = profile.role.split('·').slice(0,1)[0].trim() + ' · ' + profile.location;
+  </script>
+</body>
+</html>

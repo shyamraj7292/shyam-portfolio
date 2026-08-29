@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+<title>Shyamraj H — Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap">
+
+<style>
+  :root{
+    --bg:#05080a;
+    --panel:#080d0c;
+    --fg:#34ff8f;
+    --bright:#c6ffdd;
+    --dim:#1c8f57;
+    --path:#39c8ff;
+    --warn:#ffcf5c;
+    --err:#ff5f6d;
+    --link:#5fe0ff;
+    --glow:rgba(52,255,143,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--fg);
+    font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+    font-size:15px;line-height:1.55;overflow:hidden;
+  }
+  /* CRT atmosphere */
+  .crt{position:fixed;inset:0;pointer-events:none;z-index:5}
+  .crt::before{content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);
+    mix-blend-mode:multiply;opacity:.55}
+  .crt::after{content:"";position:absolute;inset:0;
+    background:radial-gradient(120% 120% at 50% 40%,transparent 55%,rgba(0,0,0,.55) 100%)}
+  .flicker{position:fixed;inset:0;pointer-events:none;z-index:4;background:var(--glow);opacity:0;
+    animation:fl 6s infinite steps(1)}
+  @keyframes fl{0%,97%{opacity:0}98%{opacity:.015}99%{opacity:0}}
+
+  /* top bar */
+  .bar{position:fixed;top:0;left:0;right:0;height:34px;z-index:6;
+    display:flex;align-items:center;gap:12px;padding:0 14px;
+    background:linear-gradient(#0b1512,#070c0b);border-bottom:1px solid #123;
+    color:var(--dim);font-size:12px;letter-spacing:.02em}
+  .bar .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .bar .dot.r{background:#ff5f56}.bar .dot.y{background:#ffbd2e}.bar .dot.g{background:#27c93f}
+  .bar .title{color:var(--bright);margin-left:6px}
+  .bar .spacer{flex:1}
+  .bar .clock{font-variant-numeric:tabular-nums}
+
+  /* screen */
+  .screen{position:absolute;inset:0;overflow-y:auto;padding:18px clamp(14px,4vw,42px) 90px;
+    text-shadow:0 0 6px var(--glow);scroll-behavior:smooth}
+  .screen::-webkit-scrollbar{width:10px}
+  .screen::-webkit-scrollbar-thumb{background:#123a2a;border-radius:10px}
+
+  .line{white-space:pre-wrap;word-break:break-word}
+  .muted{color:var(--dim)}
+  .bright{color:var(--bright)}
+  .warn{color:var(--warn)}
+  .err{color:var(--err)}
+  .path{color:var(--path)}
+  a{color:var(--link);text-decoration:none;border-bottom:1px dotted var(--link)}
+  a:hover{background:var(--link);color:var(--bg)}
+
+  .banner{display:block;white-space:pre;overflow-x:auto;color:var(--fg);line-height:1.04;
+    font-size:clamp(8px,1.95vw,14px);margin:2px 0 6px;text-shadow:0 0 10px var(--glow)}
+  .banner::-webkit-scrollbar{height:6px}
+  .banner::-webkit-scrollbar-thumb{background:#123a2a;border-radius:6px}
+  .k{color:var(--bright)}          /* key/label */
+  .v{color:var(--fg)}              /* value */
+  .cmd{color:var(--warn)}          /* command names in help */
+  .prompt .u{color:var(--fg)}
+  .prompt .h{color:var(--fg)}
+  .prompt .c{color:var(--bright)}
+  .prompt .p{color:var(--path)}
+  .tag{color:var(--dim)}
+
+  table.kv{border-collapse:collapse}
+  table.kv td{padding:1px 18px 1px 0;vertical-align:top}
+  .card{border-left:2px solid var(--dim);padding:2px 0 6px 12px;margin:8px 0}
+  .card .t{color:var(--bright)}
+  .card .s{color:var(--path)}
+  .neo{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+  .neo pre{margin:0;color:var(--fg)}
+
+  /* input row */
+  .inputrow{display:flex;align-items:center;gap:8px;padding:2px clamp(14px,4vw,42px);
+    position:relative}
+  #screenwrap{position:absolute;inset:34px 0 0 0}
+  .prompt{white-space:nowrap}
+  #cmd{flex:1;background:transparent;border:none;outline:none;color:var(--fg);
+    font:inherit;caret-color:var(--fg);text-shadow:0 0 6px var(--glow);padding:0}
+  #cmd::selection{background:var(--fg);color:var(--bg)}
+
+  .hint{color:var(--dim);font-size:12.5px}
+
+  @media (prefers-reduced-motion:reduce){
+    .flicker{animation:none}
+    .screen{scroll-behavior:auto}
+  }
+</style>
+
+<div class="bar">
+  <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+  <span class="title">visitor@shyamraj:&nbsp;~</span>
+  <span class="spacer"></span>
+  <span class="muted">secure shell</span>
+  <span class="clock" id="clock">--:--:--</span>
+</div>
+
+<div id="screenwrap">
+  <div class="screen" id="screen"></div>
+</div>
+
+<div class="crt"></div>
+<div class="flicker"></div>
+
+<script>
+(function(){
+  "use strict";
+  const screen = document.getElementById('screen');
+  const clockEl = document.getElementById('clock');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------- DATA (from résumé) ---------------- */
+  const P = {
+    name:"Shyamraj H",
+    role:"B.Tech CSE (Cybersecurity) · Software Engineer & Offensive-Security enthusiast",
+    location:"Coimbatore, India",
+    email:"shyamraj10335@gmail.com",
+    github:"https://github.com/shyamraj7292",
+    githubShort:"github.com/shyamraj7292",
+    linkedin:"https://www.linkedin.com/in/shyam-raj-a64435373",
+    linkedinShort:"linkedin.com/in/shyam-raj",
+    summary:"Computer Science student specialising in Cybersecurity with hands-on backend\n"+
+            "development across Python, FastAPI and Flask, plus offensive-security tooling.\n"+
+            "I ship production-adjacent backend modules, build full-stack apps, and perform\n"+
+            "under pressure in hackathons and CTFs."
+  };
+  const EDU = [
+    ["B.Tech — Computer Science (Cybersecurity)","Amrita Vishwa Vidyapeetham, Coimbatore","Expected 2027 · CGPA 8.19"],
+    ["Class 12 — Chinmaya Vidyalaya, Kilpauk","","2023 · 88%"],
+    ["Class 10 — Chinmaya Vidyalaya, Kilpauk","","2021 · 90%"]
+  ];
+  const SKILLS = [
+    ["Languages","Python, C, C++, JavaScript/TypeScript, SQL, Bash"],
+    ["Backend & APIs","FastAPI, Flask, REST, WebSockets, PostgreSQL, SQLite, ChromaDB"],
+    ["Frontend","React, TypeScript, Vite, Tailwind CSS"],
+    ["Offensive security","Scapy, socket programming, port/subdomain scanning, password cracking"],
+    ["Sec tools","Burp Suite, Nmap, Metasploit, Wireshark, GDB, radare2"],
+    ["Cryptography","Argon2, bcrypt, AES-GCM, secure coding, null-safety design"],
+    ["Data & ML","Scikit-learn, TensorFlow, NumPy, Pandas, Matplotlib"],
+    ["Blockchain","Solidity, Hardhat"],
+    ["Dev & OS","Git, GitHub, GitLab, Linux, Docker"]
+  ];
+  const EXP = [
+    ["Security Intern","CAMS Limited","Apr 2026 – Present",
+     ["Security engineering within a large financial-services environment."]],
+    ["Backend Developer Intern","Springer Capital Investments LLC, USA","Jan 2026 – Apr 2026",
+     ["Improved database interaction, query processing and result-handling in Redtail Services.",
+      "Added validation, safer attribute access and null-safety to harden backend reliability.",
+      "Contributed to PII-protection and pseudonymization workflows for sensitive data."]],
+    ["Cybersecurity Intern","Redynox","Dec 2025 – Jan 2026",
+     ["Worked on secure systems, digital-infrastructure protection and cyber-awareness."]],
+    ["Offensive Cyber Security Intern","InLighnX Global Pvt. Ltd.","Oct 2025 – Dec 2025",
+     ["Built network & port scanners with Scapy and socket programming.",
+      "Developed subdomain-enumeration, PDF-protection and PDF-cracking tooling.",
+      "Applied multithreading and system-level programming to build security tools from scratch."]]
+  ];
+  const PROJECTS = [
+    ["Autonomous AI Compliance Platform","Python · FastAPI · React · Gemini · ChromaDB · PostgreSQL · Docker",
+     ["Multi-agent platform — 4 agents (Regulatory Scout, Gap Analyst, Risk Sentinel, Evidence",
+      "Officer) collaborate with a Reason+Act loop to automate regulatory gap analysis.",
+      "RAG pipeline (ChromaDB + Gemini 2.0 Flash) surfaces compliance gaps vs. policy docs.",
+      "FastAPI+PostgreSQL backend, React frontend, automated PDF audit reports."]],
+    ["KronoTrace","Python · FastAPI · WebSockets · Scapy · Scikit-learn",
+     ["Forensic log-analysis & real-time threat detection over Windows event logs, PCAPs,",
+      "syslogs and CSV dumps unified into one timeline schema.",
+      "Multi-pattern engine: brute force, privilege escalation, data exfiltration, new-IP anomalies.",
+      "Async FastAPI + WebSockets streams live alerts to an interactive dashboard."]],
+    ["HiveWatch","Python · FastAPI · SQLAlchemy · PostgreSQL · React · Docker",
+     ["IoT honeypot deception platform that captures & visualises attacker activity live.",
+      "SQLAlchemy/PostgreSQL storage with an ingestion API for simulated device telemetry.",
+      "React/TS admin dashboard with a live attack map and incident-response playbooks."]],
+    ["PhishGuard-Chain","Python · FastAPI · React · Solidity · Hardhat · Docker",
+     ["End-to-end phishing detection: FastAPI scoring API + React dashboard + on-chain provenance.",
+      "Solidity smart contract (Hardhat) registers & verifies trusted sending domains on-chain.",
+      "Modular pipeline splits ML scoring and blockchain verification via Docker Compose."]]
+  ];
+  const ACH = [
+    "3rd place — ATC CTF ($200 prize)",
+    "Best Innovation Award (Special Mention) — Prismatic'26 Hackathon",
+    "Finalist — Visa 24Hr AI Hackathon, IITM (Top 50 / 450+ teams)",
+    "Finalist — Hack2TechSustain 2.0 (Top 25 / 2000+ teams)",
+    "Specathon'25 — selected through Round 4"
+  ];
+  const CERTS = [
+    "Google Cybersecurity Professional Certificate — Coursera",
+    "Cisco Networking Academy — Ethical Hacking",
+    "CompTIA Security+ — (in progress)"
+  ];
+
+  /* ---------------- helpers ---------------- */
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function print(html){const d=document.createElement('div');d.className='line';d.innerHTML=html;screen.appendChild(d);scrollBottom();return d;}
+  function blank(){print('&nbsp;');}
+  function scrollBottom(){screen.scrollTop=screen.scrollHeight;}
+  const A=(url,txt)=>`<a href="${url}" target="_blank" rel="noopener">${txt||url}</a>`;
+
+  const BANNER =
+`<span class="banner">█████ █   █ █   █ █████ █   █ ████  █████     █       █   █
+█     █   █ █   █ █   █ ██ ██ █   █ █   █     █       █   █
+█████ █████ █████ █████ █ █ █ ████  █████     █       █████
+    █ █   █   █   █   █ █   █ █  █  █   █ █   █       █   █
+█████ █   █   █   █   █ █   █ █   █ █   █  ███        █   █</span>`;
+
+  /* ---------------- commands ---------------- */
+  const COMMANDS = {
+    help(){
+      const rows = [
+        ["about","who I am, in one paragraph"],
+        ["neofetch","stats at a glance"],
+        ["skills","languages, tools & frameworks"],
+        ["projects","featured builds (try: projects 2)"],
+        ["experience","internships & roles"],
+        ["education","degree & schooling"],
+        ["achievements","hackathons, CTFs & awards"],
+        ["certs","certifications"],
+        ["contact","email & social links"],
+        ["resume","how to get my résumé"],
+        ["theme","switch colour: theme amber | cyan | green"],
+        ["banner","print the logo"],
+        ["clear","clear the screen"],
+        ["3d","about the 3D version"]
+      ];
+      let out='<span class="muted">Available commands — type any of them and hit Enter:</span>\n';
+      out+=rows.map(r=>`  <span class="cmd">${r[0].padEnd(13)}</span><span class="muted">${r[1]}</span>`).join('\n');
+      out+='\n\n<span class="muted">Also: <span class="cmd">whoami ls cat sudo echo date history</span> — and ↑/↓ for history, Tab to autocomplete.</span>';
+      out+='\n<span class="muted">Tip: every command works with a leading slash too, e.g. <span class="cmd">/help</span> or <span class="cmd">/projects</span>.</span>';
+      return out;
+    },
+    about(){
+      return `<span class="bright">${esc(P.name)}</span>\n<span class="muted">${esc(P.role)}</span>\n<span class="muted">${esc(P.location)}</span>\n\n${esc(P.summary)}`;
+    },
+    whoami(){return COMMANDS.about();},
+    neofetch(){
+      const logo =
+`   <span class="bright">.--.</span>
+  <span class="bright">|o_o |</span>   <span class="bright">shyamraj</span>@portfolio
+  <span class="bright">|:_/ |</span>   ------------------
+ <span class="bright">//   \\ \\</span>  role   : SDE + Security
+<span class="bright">(|     | )</span> based  : Coimbatore, IN
+<span class="bright">/'\\_   _/\`\\</span> degree : B.Tech Cyber '27
+<span class="bright">\\___)=(___/</span> uptime : hackathons++`;
+      const info =
+`<span class="k">projects</span> : 4 featured (type <span class="cmd">projects</span>)
+<span class="k">stack</span>    : Python · FastAPI · React · Docker
+<span class="k">security</span> : Scapy · Burp · Nmap · Metasploit
+<span class="k">CTF</span>      : ATC CTF — 3rd place
+<span class="k">certs</span>    : Google Cyber · Cisco EH · Sec+
+<span class="k">email</span>    : ${A('mailto:'+P.email,P.email)}
+<span class="k">github</span>   : ${A(P.github,P.githubShort)}
+<span class="k">linkedin</span> : ${A(P.linkedin,P.linkedinShort)}`;
+      return `<div class="neo"><pre>${logo}</pre><pre>${info}</pre></div>`;
+    },
+    skills(){
+      return SKILLS.map(([k,v])=>`  <span class="k">${k.padEnd(20)}</span><span class="muted">${esc(v)}</span>`).join('\n');
+    },
+    education(){
+      return EDU.map(([t,s,d])=>`  <span class="bright">${esc(t)}</span>${s?`\n  <span class="path">${esc(s)}</span>`:''}\n  <span class="muted">${esc(d)}</span>`).join('\n\n');
+    },
+    experience(){
+      return EXP.map(e=>{
+        const head=`  <span class="bright">${esc(e[0])}</span>  <span class="tag">— ${esc(e[2])}</span>\n  <span class="path">${esc(e[1])}</span>`;
+        const pts=e[3].map(p=>`    <span class="muted">›</span> ${esc(p)}`).join('\n');
+        return head+'\n'+pts;
+      }).join('\n\n');
+    },
+    projects(arg){
+      if(arg){
+        const i=parseInt(arg,10)-1;
+        if(i>=0 && i<PROJECTS.length){const pr=PROJECTS[i];
+          return `  <span class="bright">${esc(pr[0])}</span>\n  <span class="path">${esc(pr[1])}</span>\n`+
+                 pr[2].map(l=>`    <span class="muted">${esc(l)}</span>`).join('\n')+
+                 `\n    <span class="muted">repo:</span> ${A(P.github,P.githubShort)}`;
+        }
+        return `<span class="err">No project #${esc(arg)}.</span> There are ${PROJECTS.length}. Try: <span class="cmd">projects</span>`;
+      }
+      let out='<span class="muted">Featured projects — type <span class="cmd">projects &lt;n&gt;</span> for details, or open the repos:</span>\n\n';
+      out+=PROJECTS.map((pr,i)=>`  <span class="warn">[${i+1}]</span> <span class="bright">${esc(pr[0])}</span>\n      <span class="path">${esc(pr[1])}</span>`).join('\n\n');
+      out+=`\n\n  <span class="muted">All source on</span> ${A(P.github,P.githubShort)}`;
+      return out;
+    },
+    achievements(){return ACH.map(a=>`  <span class="warn">★</span> ${esc(a)}`).join('\n');},
+    certs(){return CERTS.map(c=>`  <span class="k">✓</span> ${esc(c)}`).join('\n');},
+    contact(){
+      return `  <span class="k">email</span>    ${A('mailto:'+P.email,P.email)}\n`+
+             `  <span class="k">github</span>   ${A(P.github,P.githubShort)}\n`+
+             `  <span class="k">linkedin</span> ${A(P.linkedin,P.linkedinShort)}\n`+
+             `  <span class="k">location</span> <span class="muted">${esc(P.location)}</span>`;
+    },
+    socials(){return COMMANDS.contact();},
+    resume(){
+      return `<span class="muted">Download:</span> ${A('./resume.pdf','resume.pdf')} <span class="tag">(opens in a new tab)</span>\n`+
+             `<span class="muted">Or reach me:</span> ${A('mailto:'+P.email+'?subject=Résumé%20request',P.email)} <span class="muted">·</span> ${A(P.linkedin,'LinkedIn')}`;
+    },
+    ls(){
+      return `<span class="path">about.txt</span>   <span class="path">skills.json</span>   <span class="path">projects/</span>   <span class="path">experience.log</span>\n`+
+             `<span class="path">contact.md</span>  <span class="path">resume.pdf</span>    <span class="path">achievements.txt</span>`;
+    },
+    cat(arg){
+      const map={
+        'about.txt':'about','skills.json':'skills','contact.md':'contact',
+        'experience.log':'experience','achievements.txt':'achievements','resume.pdf':'resume'
+      };
+      if(!arg) return '<span class="err">usage:</span> cat &lt;file&gt;  — try <span class="cmd">ls</span>';
+      if(arg==='resume.pdf') return '<span class="warn">resume.pdf</span> is binary. Type <span class="cmd">resume</span>.';
+      if(map[arg]) return COMMANDS[map[arg]]();
+      return `<span class="err">cat: ${esc(arg)}: No such file.</span> Try <span class="cmd">ls</span>.`;
+    },
+    banner(){return BANNER;},
+    date(){return new Date().toString();},
+    echo(arg){return esc(arg||'');},
+    sudo(){return '<span class="warn">🔒 Nice try.</span> <span class="muted">This incident has been logged. (just kidding — you already have root here.)</span>';},
+    history(){return HIST.length?HIST.map((h,i)=>`  <span class="muted">${String(i+1).padStart(3)}</span>  ${esc(h)}`).join('\n'):'<span class="muted">no history yet</span>';},
+    "3d"(){setTimeout(()=>{location.href='./world.html';},900);
+           return `<span class="muted">Launching the 3D island — drive up to my projects…</span>\n`+
+                  `<span class="tag">If it doesn't open, click here:</span> ${A('./world.html','world.html')}`;},
+    home(){setTimeout(()=>{location.href='./';},700);return `<span class="muted">Back to the landing page…</span> ${A('./','home')}`;},
+    theme(arg){
+      const themes={
+        green:['#34ff8f','#c6ffdd','#1c8f57','rgba(52,255,143,.35)'],
+        amber:['#ffb642','#ffe0a3','#a9702a','rgba(255,182,66,.35)'],
+        cyan:['#37e6ff','#c2f6ff','#1f7f96','rgba(55,230,255,.35)']
+      };
+      const t=themes[arg];
+      if(!t) return `<span class="err">unknown theme.</span> options: <span class="cmd">green</span> <span class="cmd">amber</span> <span class="cmd">cyan</span>`;
+      const r=document.documentElement.style;
+      r.setProperty('--fg',t[0]);r.setProperty('--bright',t[1]);r.setProperty('--dim',t[2]);r.setProperty('--glow',t[3]);
+      r.setProperty('--link',t[0]);
+      return `<span class="muted">theme →</span> <span class="bright">${esc(arg)}</span>`;
+    },
+    clear(){screen.innerHTML='';return null;}
+  };
+  const ALIASES={h:'help','?':'help',me:'about',info:'about',projs:'projects',exp:'experience',work:'experience',edu:'education',links:'contact',cls:'clear',world:'3d'};
+
+  /* ---------------- runner ---------------- */
+  const HIST=[]; let histIdx=-1;
+  function run(raw){
+    let input=raw.trim();
+    if(input==='') return;
+    HIST.push(input); histIdx=HIST.length;
+    if(input[0]==='/') input=input.slice(1);   // slash commands: /help works like help
+    const [name,...rest]=input.split(/\s+/);
+    const arg=rest.join(' ');
+    let key=name.toLowerCase();
+    if(ALIASES[key]) key=ALIASES[key];
+    const fn=COMMANDS[key];
+    if(!fn){print(`<span class="err">command not found:</span> ${esc(name)} <span class="muted">— type</span> <span class="cmd">help</span>`);return;}
+    const res=fn(arg);
+    if(res!==null && res!==undefined) print(res);
+  }
+
+  /* ---------------- prompt line ---------------- */
+  const promptHTML='<span class="prompt"><span class="u">visitor</span><span class="c">@</span><span class="h">shyamraj</span><span class="c">:</span><span class="p">~</span><span class="c">$</span></span>';
+  let inputEl=null;
+  function newPrompt(){
+    const row=document.createElement('div');
+    row.className='inputrow';
+    row.innerHTML=`${promptHTML} <input id="cmd" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="terminal input">`;
+    screen.appendChild(row);
+    inputEl=row.querySelector('#cmd');
+    inputEl.focus();
+    scrollBottom();
+  }
+  function echoCommand(cmd){
+    const d=document.createElement('div');
+    d.className='line';
+    d.innerHTML=`${promptHTML} <span class="bright">${esc(cmd)}</span>`;
+    screen.appendChild(d);
+  }
+
+  document.addEventListener('keydown',e=>{
+    if(!inputEl) return;
+    if(document.activeElement!==inputEl && !e.metaKey && !e.ctrlKey) inputEl.focus();
+    if(e.key==='Enter'){
+      const val=inputEl.value;
+      const row=inputEl.closest('.inputrow'); row.remove();
+      echoCommand(val);
+      run(val);
+      newPrompt();
+    } else if(e.key==='ArrowUp'){
+      if(HIST.length){histIdx=Math.max(0,histIdx-1);inputEl.value=HIST[histIdx]||'';moveCaretEnd();}
+      e.preventDefault();
+    } else if(e.key==='ArrowDown'){
+      if(HIST.length){histIdx=Math.min(HIST.length,histIdx+1);inputEl.value=HIST[histIdx]||'';moveCaretEnd();}
+      e.preventDefault();
+    } else if(e.key==='Tab'){
+      e.preventDefault();
+      let cur=inputEl.value.trim().toLowerCase();
+      const slash=cur[0]==='/'?'/':'';
+      if(slash) cur=cur.slice(1);
+      if(cur){
+        const pool=Object.keys(COMMANDS).concat(Object.keys(ALIASES));
+        const m=pool.filter(c=>c.startsWith(cur));
+        if(m.length===1) inputEl.value=slash+m[0];
+        else if(m.length>1){echoCommand(inputEl.value);print('<span class="muted">'+m.join('   ')+'</span>');newPromptKeep(slash+cur);}
+      }
+    } else if((e.key==='l'||e.key==='L')&&e.ctrlKey){e.preventDefault();COMMANDS.clear();newPrompt();}
+  });
+  function newPromptKeep(v){const row=inputEl.closest('.inputrow');row.remove();newPrompt();inputEl.value=v;moveCaretEnd();}
+  function moveCaretEnd(){requestAnimationFrame(()=>{const n=inputEl.value.length;inputEl.setSelectionRange(n,n);});}
+  document.addEventListener('click',()=>{if(inputEl)inputEl.focus();});
+
+  /* ---------------- clock ---------------- */
+  function tick(){const d=new Date();clockEl.textContent=d.toLocaleTimeString([], {hour12:false});}
+  tick(); setInterval(tick,1000);
+
+  /* ---------------- boot ---------------- */
+  const boot=[
+    '<span class="muted">Booting shyamOS v1.0 — secure shell</span>',
+    '<span class="muted">[</span><span class="bright"> ok </span><span class="muted">] mounting /home/shyamraj</span>',
+    '<span class="muted">[</span><span class="bright"> ok </span><span class="muted">] loading skills · projects · experience</span>',
+    '<span class="muted">[</span><span class="bright"> ok </span><span class="muted">] establishing encrypted session</span>',
+    ''
+  ];
+  async function bootSeq(){
+    if(reduce){
+      boot.forEach(b=>print(b||'&nbsp;'));
+      print(BANNER);blank();
+      print(`<span class="bright">${esc(P.name)}</span> <span class="muted">— ${esc(P.role)}</span>`);
+      print('<span class="muted">Interactive résumé. Type</span> <span class="cmd">help</span> <span class="muted">to begin, or</span> <span class="cmd">about</span><span class="muted">.</span>');
+      blank(); newPrompt(); return;
+    }
+    for(const b of boot){print(b||'&nbsp;');await sleep(140);}
+    print(BANNER);await sleep(120);blank();
+    print(`<span class="bright">${esc(P.name)}</span> <span class="muted">— ${esc(P.role)}</span>`);
+    await sleep(120);
+    print('<span class="muted">Interactive résumé. Type</span> <span class="cmd">help</span> <span class="muted">to begin, or</span> <span class="cmd">about</span><span class="muted">.  (Tab autocompletes · ↑ recalls)</span>');
+    blank(); newPrompt();
+  }
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  bootSeq();
+})();
+</script>
+
+</body>
+</html>

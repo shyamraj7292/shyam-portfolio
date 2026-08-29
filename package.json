@@ -1,0 +1,18 @@
+{
+  "name": "shyamraj-portfolio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Shyamraj H — interactive developer portfolio (3D drivable world + terminal CLI)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.4.10"
+  },
+  "dependencies": {
+    "three": "^0.169.0"
+  }
+}
