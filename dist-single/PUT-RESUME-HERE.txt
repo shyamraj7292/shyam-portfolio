@@ -1,0 +1,9 @@
+Drop your résumé PDF in this folder, named exactly:
+
+    resume.pdf
+
+Anything in /public is copied to the site root at build time, so it becomes
+https://your-site/resume.pdf — which is what the landing page's "Résumé" button
+and the terminal's `resume` command link to.
+
+You can delete this .txt file once resume.pdf is in place.

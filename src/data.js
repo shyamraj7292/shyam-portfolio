@@ -63,10 +63,12 @@ export const experience = [
   },
 ];
 
+const GH = "https://github.com/shyamraj7292/";
 export const projects = [
   {
     name: "Autonomous AI Compliance Platform",
     stack: "Python · FastAPI · React · Gemini · ChromaDB · PostgreSQL · Docker",
+    repo: GH + "Autonomous-AI-compliance-platform",
     points: [
       "Multi-agent platform — 4 agents (Regulatory Scout, Gap Analyst, Risk Sentinel, Evidence Officer) collaborate with a Reason+Act loop to automate regulatory gap analysis.",
       "RAG pipeline (ChromaDB + Gemini 2.0 Flash) surfaces compliance gaps against internal policy documents.",
@@ -74,8 +76,27 @@ export const projects = [
     ],
   },
   {
+    name: "ReconAI",
+    stack: "Python · Gemini · SQLite · Streamlit",
+    repo: GH + "ReconAI",
+    points: [
+      "Financial reconciliation agent that matches merchant ledgers against bank statements and payment-gateway reports using deterministic rules.",
+      "An LLM classifies the remaining exceptions, then takes gated resolution actions with a full audit log.",
+    ],
+  },
+  {
+    name: "Sentinel — Agentic SOC Analyst",
+    stack: "Python · FastAPI · MCP · Claude · Splunk Foundation-sec",
+    repo: GH + "Splunk-Agentic-Ops",
+    points: [
+      "Autonomous SOC analyst that takes a Splunk notable event and works it end-to-end like a Tier-1 analyst.",
+      "Integrates with Splunk over the Model Context Protocol (MCP); orchestrates multiple LLM backends behind a FastAPI dashboard.",
+    ],
+  },
+  {
     name: "KronoTrace",
     stack: "Python · FastAPI · WebSockets · Scapy · Scikit-learn",
+    repo: GH + "KronoTrace",
     points: [
       "Forensic log-analysis & real-time threat detection over Windows event logs, PCAPs, syslogs and CSV dumps unified into one timeline schema.",
       "Multi-pattern engine: brute force, privilege escalation, data exfiltration, anomalous file access, new-IP anomalies.",
@@ -83,8 +104,18 @@ export const projects = [
     ],
   },
   {
+    name: "Copa Agent — Autonomous DevOps",
+    stack: "Python · FastAPI · Gemini 2.0 · Vertex AI · GitLab MCP · Cloud Run",
+    repo: GH + "Google-Cloud-Rapid-Agent-",
+    points: [
+      "Autonomous DevOps agent that fixes failing CI/CD pipelines — reads logs, writes code fixes, opens merge requests and re-runs to verify.",
+      "GitLab MCP integration; deployed on Cloud Run with Firestore for state.",
+    ],
+  },
+  {
     name: "HiveWatch",
     stack: "Python · FastAPI · SQLAlchemy · PostgreSQL · React · Docker",
+    repo: GH + "Hivewatch",
     points: [
       "IoT honeypot deception platform that captures and visualises attacker activity in real time.",
       "SQLAlchemy/PostgreSQL storage with an ingestion API for simulated IoT device telemetry.",
@@ -92,12 +123,56 @@ export const projects = [
     ],
   },
   {
+    name: "Loop — Story-Tracking News",
+    stack: "Python · FastAPI · PostgreSQL + pgvector · Redis · Celery · HTMX",
+    repo: GH + "Loop",
+    points: [
+      "News aggregator for infrequent readers that tracks stories, not articles — showing only the developments you missed since your last visit.",
+      "sentence-transformers embeddings + HDBSCAN clustering group articles into evolving stories.",
+    ],
+  },
+  {
     name: "PhishGuard-Chain",
     stack: "Python · FastAPI · React · Solidity · Hardhat · Docker",
+    repo: GH + "Phishguard-Chain",
     points: [
       "End-to-end phishing detection: FastAPI scoring API + React dashboard + on-chain provenance for trusted senders.",
       "Solidity smart contract (Hardhat) registers and verifies trusted sending domains on-chain.",
       "Modular pipeline splits ML scoring and blockchain verification via Docker Compose.",
+    ],
+  },
+  {
+    name: "SOC Dashboard (mini-SIEM)",
+    stack: "Python · Flask · SQLite · Chart.js",
+    repo: GH + "SOC-Dashboard",
+    points: [
+      "A small-scale SIEM: real-time log collection, threat detection, event correlation and security visualisation.",
+    ],
+  },
+  {
+    name: "Automata — Rust Mini-Compiler",
+    stack: "Rust",
+    repo: GH + "Automata-Project",
+    points: [
+      "A mini-compiler for a compiler-design course: a full pipeline from lexical analysis to MIPS assembly output.",
+      "Includes an optional optimisation pass.",
+    ],
+  },
+  {
+    name: "CarbonCoach",
+    stack: "Python · FastAPI · Gemini · Chart.js",
+    repo: GH + "CarbonCoach",
+    points: [
+      "AI agent that helps people understand, track and reduce their carbon footprint through conversation, photo logging and a live dashboard.",
+    ],
+  },
+  {
+    name: "GigShield",
+    stack: "JavaScript · Chart.js · ML (GBT + LSTM)",
+    repo: GH + "Guidewire-Hackathon-2026",
+    points: [
+      "Instant, automated parametric payouts triggered by real-time environmental data to protect gig workers from weather-driven income loss.",
+      "Predictive analytics with gradient-boosted trees and LSTM models.",
     ],
   },
 ];

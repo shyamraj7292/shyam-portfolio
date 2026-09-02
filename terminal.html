@@ -172,25 +172,55 @@
       "Developed subdomain-enumeration, PDF-protection and PDF-cracking tooling.",
       "Applied multithreading and system-level programming to build security tools from scratch."]]
   ];
+  const GH="https://github.com/shyamraj7292/";
   const PROJECTS = [
     ["Autonomous AI Compliance Platform","Python · FastAPI · React · Gemini · ChromaDB · PostgreSQL · Docker",
      ["Multi-agent platform — 4 agents (Regulatory Scout, Gap Analyst, Risk Sentinel, Evidence",
       "Officer) collaborate with a Reason+Act loop to automate regulatory gap analysis.",
       "RAG pipeline (ChromaDB + Gemini 2.0 Flash) surfaces compliance gaps vs. policy docs.",
-      "FastAPI+PostgreSQL backend, React frontend, automated PDF audit reports."]],
+      "FastAPI+PostgreSQL backend, React frontend, automated PDF audit reports."],GH+"Autonomous-AI-compliance-platform"],
+    ["ReconAI","Python · Gemini · SQLite · Streamlit",
+     ["Financial reconciliation agent — matches merchant ledgers against bank statements and",
+      "payment-gateway reports using deterministic rules.",
+      "An LLM classifies remaining exceptions, then takes gated resolution actions with an audit log."],GH+"ReconAI"],
+    ["Sentinel — Agentic SOC Analyst","Python · FastAPI · MCP · Claude · Splunk Foundation-sec",
+     ["Autonomous SOC analyst that takes a Splunk notable event and works it end-to-end like a",
+      "Tier-1 analyst.",
+      "Integrates with Splunk over MCP; orchestrates multiple LLM backends behind a FastAPI dashboard."],GH+"Splunk-Agentic-Ops"],
     ["KronoTrace","Python · FastAPI · WebSockets · Scapy · Scikit-learn",
      ["Forensic log-analysis & real-time threat detection over Windows event logs, PCAPs,",
       "syslogs and CSV dumps unified into one timeline schema.",
       "Multi-pattern engine: brute force, privilege escalation, data exfiltration, new-IP anomalies.",
-      "Async FastAPI + WebSockets streams live alerts to an interactive dashboard."]],
+      "Async FastAPI + WebSockets streams live alerts to an interactive dashboard."],GH+"KronoTrace"],
+    ["Copa Agent — Autonomous DevOps","Python · FastAPI · Gemini 2.0 · Vertex AI · GitLab MCP · Cloud Run",
+     ["Autonomous DevOps agent that fixes failing CI/CD pipelines — reads logs, writes code fixes,",
+      "opens merge requests and re-runs to verify.",
+      "GitLab MCP integration; deployed on Cloud Run with Firestore for state."],GH+"Google-Cloud-Rapid-Agent-"],
     ["HiveWatch","Python · FastAPI · SQLAlchemy · PostgreSQL · React · Docker",
      ["IoT honeypot deception platform that captures & visualises attacker activity live.",
       "SQLAlchemy/PostgreSQL storage with an ingestion API for simulated device telemetry.",
-      "React/TS admin dashboard with a live attack map and incident-response playbooks."]],
+      "React/TS admin dashboard with a live attack map and incident-response playbooks."],GH+"Hivewatch"],
+    ["Loop — Story-Tracking News","Python · FastAPI · PostgreSQL+pgvector · Redis · Celery · HTMX",
+     ["News aggregator for infrequent readers that tracks stories, not articles — showing only",
+      "the developments you missed since your last visit.",
+      "sentence-transformers embeddings + HDBSCAN clustering group articles into evolving stories."],GH+"Loop"],
     ["PhishGuard-Chain","Python · FastAPI · React · Solidity · Hardhat · Docker",
      ["End-to-end phishing detection: FastAPI scoring API + React dashboard + on-chain provenance.",
       "Solidity smart contract (Hardhat) registers & verifies trusted sending domains on-chain.",
-      "Modular pipeline splits ML scoring and blockchain verification via Docker Compose."]]
+      "Modular pipeline splits ML scoring and blockchain verification via Docker Compose."],GH+"Phishguard-Chain"],
+    ["SOC Dashboard (mini-SIEM)","Python · Flask · SQLite · Chart.js",
+     ["A small-scale SIEM: real-time log collection, threat detection, event correlation and",
+      "security visualisation."],GH+"SOC-Dashboard"],
+    ["Automata — Rust Mini-Compiler","Rust",
+     ["A mini-compiler for a compiler-design course: full pipeline from lexical analysis to MIPS",
+      "assembly output, with an optional optimisation pass."],GH+"Automata-Project"],
+    ["CarbonCoach","Python · FastAPI · Gemini · Chart.js",
+     ["AI agent that helps people understand, track and reduce their carbon footprint through",
+      "conversation, photo logging and a live dashboard."],GH+"CarbonCoach"],
+    ["GigShield","JavaScript · Chart.js · ML (GBT + LSTM)",
+     ["Instant, automated parametric payouts triggered by real-time environmental data to protect",
+      "gig workers from weather-driven income loss.",
+      "Predictive analytics with gradient-boosted trees and LSTM models."],GH+"Guidewire-Hackathon-2026"]
   ];
   const ACH = [
     "3rd place — ATC CTF ($200 prize)",
@@ -287,7 +317,7 @@
         if(i>=0 && i<PROJECTS.length){const pr=PROJECTS[i];
           return `  <span class="bright">${esc(pr[0])}</span>\n  <span class="path">${esc(pr[1])}</span>\n`+
                  pr[2].map(l=>`    <span class="muted">${esc(l)}</span>`).join('\n')+
-                 `\n    <span class="muted">repo:</span> ${A(P.github,P.githubShort)}`;
+                 `\n    <span class="muted">repo:</span> ${A(pr[3]||P.github, (pr[3]||P.github).replace('https://github.com/',''))}`;
         }
         return `<span class="err">No project #${esc(arg)}.</span> There are ${PROJECTS.length}. Try: <span class="cmd">projects</span>`;
       }

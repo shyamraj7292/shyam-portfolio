@@ -241,7 +241,7 @@ zoneDefs.forEach((def, i) => {
 /* ---------- driving state ---------- */
 const keys = { up: false, down: false, left: false, right: false };
 const state = { x: 0, z: 6, heading: Math.PI, speed: 0 };
-const MAX = 0.62, ACC = 0.013, REV = 0.009, FRICTION = 0.972, BRAKE = 0.90, TURN = 0.036;
+const MAX = 0.40, ACC = 0.0085, REV = 0.006, FRICTION = 0.975, BRAKE = 0.90, TURN = 0.032;
 
 function forwardVec() { return new THREE.Vector3(Math.sin(state.heading), 0, Math.cos(state.heading)); }
 
@@ -344,11 +344,12 @@ function renderZone(id) {
           </div>
         </div>`;
     case 'projects':
-      return projects.map(p => `<div class="item">
+      return `<p style="color:var(--dim);font-size:12px;margin-bottom:10px">${projects.length} projects — all on ${A(profile.github, profile.githubShort)}</p>` +
+        projects.map(p => `<div class="item">
         <div class="t">${p.name}</div><div class="s">${p.stack}</div>
         <ul>${p.points.map(x => `<li>${x}</li>`).join('')}</ul>
-        </div>`).join('') +
-        `<div style="color:var(--dim);font-size:12px">All source on ${A(profile.github, profile.githubShort)}</div>`;
+        ${p.repo ? `<div style="font-size:12px;margin-top:4px">${A(p.repo, 'view repo ↗')}</div>` : ''}
+        </div>`).join('');
     case 'experience':
       return experience.map(x => `<div class="item">
         <div class="t">${x.role} <span style="color:var(--dim);font-weight:400">— ${x.dates}</span></div>
@@ -510,5 +511,8 @@ addEventListener('load', () => setTimeout(hideLoader, 350));
 setTimeout(hideLoader, 1400); // fallback
 function hideLoader() {
   const l = document.getElementById('loader');
-  if (l) l.classList.add('hide');
+  if (!l || l.dataset.gone) return;
+  l.dataset.gone = '1';
+  l.classList.add('hide');
+  setTimeout(() => { l.style.display = 'none'; }, 650);
 }
