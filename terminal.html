@@ -67,8 +67,8 @@
   a{color:var(--link);text-decoration:none;border-bottom:1px dotted var(--link)}
   a:hover{background:var(--link);color:var(--bg)}
 
-  .banner{display:block;white-space:pre;overflow-x:auto;color:var(--fg);line-height:1.04;
-    font-size:clamp(8px,1.95vw,14px);margin:2px 0 6px;text-shadow:0 0 10px var(--glow)}
+  .namebig{font-weight:700;font-size:clamp(30px,8.5vw,60px);letter-spacing:.12em;color:var(--path);
+    text-shadow:0 0 22px var(--glow);line-height:1.05;margin:10px 0 2px}
   .banner::-webkit-scrollbar{height:6px}
   .banner::-webkit-scrollbar-thumb{background:#123a2a;border-radius:6px}
   .k{color:var(--bright)}          /* key/label */
@@ -242,12 +242,7 @@
   function scrollBottom(){screen.scrollTop=screen.scrollHeight;}
   const A=(url,txt)=>`<a href="${url}" target="_blank" rel="noopener">${txt||url}</a>`;
 
-  const BANNER =
-`<span class="banner">█████ █   █ █   █ █████ █   █ ████  █████     █       █   █
-█     █   █ █   █ █   █ ██ ██ █   █ █   █     █       █   █
-█████ █████ █████ █████ █ █ █ ████  █████     █       █████
-    █ █   █   █   █   █ █   █ █  █  █   █ █   █       █   █
-█████ █   █   █   █   █ █   █ █   █ █   █  ███        █   █</span>`;
+  const BANNER = `<div class="namebig">SHYAMRAJ&nbsp;H</div>`;
 
   /* ---------------- commands ---------------- */
   const COMMANDS = {
@@ -463,13 +458,13 @@
     if(reduce){
       boot.forEach(b=>print(b||'&nbsp;'));
       print(BANNER);blank();
-      print(`<span class="bright">${esc(P.name)}</span> <span class="muted">— ${esc(P.role)}</span>`);
+      print(`<span class="muted">${esc(P.role)}</span>`);
       print('<span class="muted">Interactive résumé. Type</span> <span class="cmd">help</span> <span class="muted">to begin, or</span> <span class="cmd">about</span><span class="muted">.</span>');
       blank(); newPrompt(); return;
     }
     for(const b of boot){print(b||'&nbsp;');await sleep(140);}
     print(BANNER);await sleep(120);blank();
-    print(`<span class="bright">${esc(P.name)}</span> <span class="muted">— ${esc(P.role)}</span>`);
+    print(`<span class="muted">${esc(P.role)}</span>`);
     await sleep(120);
     print('<span class="muted">Interactive résumé. Type</span> <span class="cmd">help</span> <span class="muted">to begin, or</span> <span class="cmd">about</span><span class="muted">.  (Tab autocompletes · ↑ recalls)</span>');
     blank(); newPrompt();
